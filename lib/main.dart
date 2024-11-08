@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gemini/pages/home.dart';
+import 'package:flutter_gemini/pages/home_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const MyApp(),
