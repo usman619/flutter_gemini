@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gemini/bloc/chat_bloc.dart';
+import 'package:flutter_gemini/components/chat_list_view.dart';
+import 'package:flutter_gemini/components/chat_text_field.dart';
 import 'package:flutter_gemini/models/chat_message_model.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
@@ -17,16 +19,42 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ChatBloc chatBloc = ChatBloc();
   TextEditingController textEditingController = TextEditingController();
-  bool clear_messages = false;
+  final ScrollController _scrollController = ScrollController();
+  bool clearMessages = false;
 
   @override
   void initState() {
     super.initState();
+    chatBloc.stream.listen((state) {
+      if (state is ChatSuccessState) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToBottom();
+        });
+      }
+    });
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    textEditingController.dispose();
+    chatBloc.close();
+    super.dispose();
   }
 
   void _clearMessages(List<ChatMessageModel> messages) {
     setState(() {
-      clear_messages = true;
+      clearMessages = true;
     });
     // Fluttertoast.showToast(
     //   msg: 'Chat cleared!',
@@ -38,10 +66,14 @@ class _HomePageState extends State<HomePage> {
     messages.clear();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("Chat Cleared!",
+        content: Center(
+          child: Text(
+            "Chat Cleared!",
             style: GoogleFonts.firaCode(
               color: Colors.white,
-            )),
+            ),
+          ),
+        ),
         backgroundColor: Colors.black,
       ),
     );
@@ -103,14 +135,6 @@ class _HomePageState extends State<HomePage> {
                                     color: Colors.white,
                                   ),
                                 ),
-                                // IconButton(
-                                //   onPressed: () {},
-                                //   icon: const Icon(
-                                //     Icons.image_search,
-                                //     size: 24,
-                                //     color: Colors.white,
-                                //   ),
-                                // )
                               ],
                             )
                           ],
@@ -118,123 +142,86 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Expanded(
                         child: ListView.builder(
-                          itemCount: messages.length,
+                          controller: _scrollController,
+                          itemCount: state.messages.length,
                           itemBuilder: (context, index) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                color: Colors.grey.withOpacity(0.1),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    messages[index].role == "user"
-                                        ? "User 👤"
-                                        : "Model 🤖",
-                                    style: GoogleFonts.firaCode(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const Divider(
-                                    thickness: 0.5,
-                                    indent: 0,
-                                    endIndent: 100,
-                                    color: Colors.white,
-                                  ),
-                                  messages[index].role == "user"
-                                      ? Text(
-                                          messages[index].parts.first.text,
-                                          style: GoogleFonts.firaCode(
-                                            fontSize: 18,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : MarkdownBody(
-                                          data:
-                                              messages[index].parts.first.text,
-                                          styleSheet: MarkdownStyleSheet(
-                                            p: GoogleFonts.firaCode(
-                                              fontSize: 18,
-                                              color: Colors.white,
-                                            ),
-                                            code: GoogleFonts.firaCode(
-                                              fontSize: 16,
-                                              color: Colors.grey[300],
-                                              backgroundColor: Colors.grey[800],
-                                            ),
-                                          ),
+                            return ChatListView(
+                              title: Text(messages[index].role == "user"
+                                  ? "User 👤"
+                                  : "Model 🤖"),
+                              message: messages[index].role == "user"
+                                  ? Text(
+                                      messages[index].parts.first.text,
+                                      style: GoogleFonts.firaCode(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : MarkdownBody(
+                                      data: messages[index].parts.first.text,
+                                      styleSheet: MarkdownStyleSheet(
+                                        p: GoogleFonts.firaCode(
+                                          fontSize: 18,
+                                          color: Colors.white,
                                         ),
-                                ],
-                              ),
+                                        code: GoogleFonts.firaCode(
+                                          fontSize: 16,
+                                          color: Colors.grey[300],
+                                          backgroundColor: Colors.grey[800],
+                                        ),
+                                      ),
+                                    ),
                             );
                           },
                         ),
                       ),
                       if (chatBloc.generatingResponse)
-                        SizedBox(
-                          height: 100,
-                          width: 100,
-                          child: Lottie.asset('assets/loading/loading1.json'),
+                        Wrap(
+                          children: [
+                            SizedBox(
+                              height: 100,
+                              width: 100,
+                              child:
+                                  Lottie.asset('assets/loading/loading1.json'),
+                            )
+                          ],
                         ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             vertical: 30, horizontal: 16),
-                        // color: Colors.white,
-                        // height: 120,
                         child: Row(
                           children: [
                             Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                child: TextField(
-                                  controller: textEditingController,
-                                  style: GoogleFonts.firaCode(
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                  cursorColor: Colors.black,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(100),
-                                    ),
-                                    hintText: "Ask Gemini anything...",
-                                    hintStyle: GoogleFonts.firaCode(
-                                      fontSize: 16,
-                                      color: Colors.grey[400],
-                                    ),
-                                    fillColor: Colors.white,
-                                    filled: true,
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide:
-                                          const BorderSide(color: Colors.black),
-                                    ),
-                                  ),
-                                  minLines: 1,
-                                  maxLines: 5,
-                                ),
+                              child: ChatTextField(
+                                textEditingController: textEditingController,
+                                chatHintText: "Ask Gemini anything...",
                               ),
                             ),
                             IconButton(
-                                onPressed: () {
-                                  if (textEditingController.text.isNotEmpty) {
-                                    String text = textEditingController.text;
-                                    textEditingController.clear();
-                                    chatBloc.add(
-                                      ChatGenerateNewTextMessageEvent(
-                                          inputMessage: text),
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.send,
-                                  size: 35,
-                                ),
-                                color: Colors.blue),
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.image,
+                                size: 35,
+                              ),
+                              color: Colors.white,
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                if (textEditingController.text.isNotEmpty) {
+                                  String text = textEditingController.text;
+                                  textEditingController.clear();
+                                  chatBloc.add(
+                                    ChatGenerateNewTextMessageEvent(
+                                        inputMessage: text),
+                                  );
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.send,
+                                size: 35,
+                              ),
+                              color: Colors.blue,
+                            ),
                           ],
                         ),
                       ),
