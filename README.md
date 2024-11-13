@@ -1,16 +1,42 @@
 # flutter_gemini
 
-A new Flutter project.
+A Flutter application that integrates with Gemini Api. The model that I am using is `gemini-1.5-flash`.
 
-## Getting Started
+## Screenshot
+### Linux
+![Screenshot](assets/screenshot/linux1.png)
+![Screenshot](assets/screenshot/linux2.png)
+## Packages Used
 
-This project is a starting point for a Flutter application.
+- `bloc`
+- `flutter_bloc`
+- `dio`
+- `cupertino_icons`
+- `flutter_dotenv`
+- `google_fonts`
+- `lottie`
+- `flutter_markdown`
+- `image_picker`
+- `flutter_image_compress`
 
-A few resources to get you started if this is your first Flutter project:
+### Installation:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Clone the repository:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+git clone https://github.com/usman619/flutter_gemini.git
+cd flutter_gemini
+code .
+```
+
+2. Install the dependencies:
+
+```bash
+flutter pub get
+```
+
+3. Run using the following command:
+
+```bash
+flutter run
+```

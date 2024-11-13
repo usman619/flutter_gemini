@@ -5,7 +5,6 @@ import 'package:flutter_gemini/components/chat_list_view.dart';
 import 'package:flutter_gemini/components/chat_text_field.dart';
 import 'package:flutter_gemini/models/chat_message_model.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
@@ -56,14 +55,9 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       clearMessages = true;
     });
-    // Fluttertoast.showToast(
-    //   msg: 'Chat cleared!',
-    //   toastLength: Toast.LENGTH_SHORT,
-    //   gravity: ToastGravity.BOTTOM,
-    //   backgroundColor: Colors.red,
-    //   textColor: Colors.white,
-    // );
-    messages.clear();
+    if (messages.isNotEmpty) {
+      messages.clear();
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Center(
@@ -71,10 +65,28 @@ class _HomePageState extends State<HomePage> {
             "Chat Cleared!",
             style: GoogleFonts.firaCode(
               color: Colors.white,
+              fontSize: 16,
             ),
           ),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.green.withOpacity(0.75),
+      ),
+    );
+  }
+
+  void _imageUploaded() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Center(
+          child: Text(
+            "Image Added",
+            style: GoogleFonts.firaCode(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.green,
       ),
     );
   }
@@ -88,9 +100,7 @@ class _HomePageState extends State<HomePage> {
       // ),
       body: BlocConsumer<ChatBloc, ChatState>(
         bloc: chatBloc,
-        listener: (context, state) {
-          // TODO: implement listener
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           switch (state.runtimeType) {
             case (ChatSuccessState):
@@ -203,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                                 Icons.image,
                                 size: 35,
                               ),
-                              color: Colors.white,
+                              color: Colors.white.withOpacity(0.75),
                             ),
                             IconButton(
                               onPressed: () {
@@ -220,11 +230,14 @@ class _HomePageState extends State<HomePage> {
                                 Icons.send,
                                 size: 35,
                               ),
-                              color: Colors.blue,
+                              color: Colors.blue.withOpacity(0.75),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(
+                        height: 20,
+                      )
                     ],
                   ),
                 ),
@@ -254,7 +267,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontSize: 32,
                       ),
-                    )
+                    ),
                   ],
                 ),
               );

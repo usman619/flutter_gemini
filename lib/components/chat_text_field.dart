@@ -4,10 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 class ChatTextField extends StatelessWidget {
   final TextEditingController textEditingController;
   final String chatHintText;
+  final Widget? imagePreview;
   const ChatTextField({
     super.key,
     required this.textEditingController,
     required this.chatHintText,
+    this.imagePreview,
   });
 
   @override
